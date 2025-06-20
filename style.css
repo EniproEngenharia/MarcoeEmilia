@@ -1,0 +1,191 @@
+/* Reset e Estilos Globais */
+:root {
+    --primary-color: #3498db;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --bg-light: #f8f9fa;
+    --border-color: #e9ecef;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    color: var(--text-dark);
+}
+
+/* Gerenciador de Visões (Telas) */
+#grid-view, #detail-view {
+    display: none;
+    padding: 40px;
+    animation: fadeIn 0.5s;
+}
+
+#grid-view.active-view, #detail-view.active-view {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilo do Painel Principal (Grid) */
+.main-header {
+    max-width: 1200px;
+    margin: 0 auto 40px auto;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.main-header h1 {
+    font-size: 2.8rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.main-header .subtitle {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.room-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(44, 62, 80, 0.1);
+}
+
+.room-card h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.room-card p {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.card-illustration {
+    height: 120px;
+    width: 100%;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ilustrações Minimalistas com CSS */
+.ill-garagem div { background-color: #d0d0d0; position: absolute; }
+.ill-garagem .luz { height: 10px; width: 60%; left:20%; top: 20%; background-color: #f1c40f;}
+
+.ill-jardim { background-color: #e8f5e9 !important;}
+.ill-jardim div { background-color: #4caf50; position: absolute; border-radius: 50%;}
+.ill-jardim .luz { background-color: #f1c40f; top: 35%;}
+.ill-jardim .moita1 { width: 80px; height: 80px; bottom: -40px; left: 20%;}
+.ill-jardim .moita2 { width: 60px; height: 60px; bottom: -30px; left: 50%;}
+
+.ill-sala-tv div { background-color: #bdc3c7; position: absolute; }
+.ill-sala-tv .tv { width: 70%; height: 50%; left: 15%; top: 20%; border: 4px solid #34495e;}
+.ill-sala-tv .rack { width: 80%; height: 10%; left: 10%; top: 75%;}
+.ill-sala-tv .luz { background-color: #f1c40f; border-radius: 50%; width: 15px; height:15px; top: 5%; left: 45%;}
+
+.ill-sala-jantar div { position: absolute; }
+.ill-sala-jantar .mesa { width: 100px; height: 100px; border-radius: 50%; background-color: #bdc3c7; left: 50%; top: 50%; transform: translate(-50%, -30%);}
+.ill-sala-jantar .luz { width: 25px; height: 25px; border-radius: 50%; background-color: #f1c40f; left: 50%; top: 15%; transform: translateX(-50%);}
+
+.ill-solario { background-color: #e3f2fd !important; }
+.ill-solario div { position: absolute; background-color: #f1c40f; }
+.ill-solario .luz1 { width: 60px; height: 60px; border-radius: 50%; top: 15%; left: 15%;}
+.ill-solario .luz2 { width: 15px; height: 15px; border-radius: 50%; top: 25%; left: 70%;}
+.ill-solario .chao { width: 100%; height: 40%; background: #bbdefb; bottom: 0;}
+
+.ill-cozinha div { position: absolute; background-color: #bdc3c7;}
+.ill-cozinha .bancada { width: 100%; height: 40%; bottom: 0;}
+.ill-cozinha .armario { width: 100%; height: 30%; top: 0;}
+.ill-cozinha .luz { width: 15px; height: 15px; border-radius: 50%; background-color: #f1c40f; left: 45%; top: 45%;}
+/* Adicione mais estilos de ilustração aqui conforme necessário... */
+
+
+/* Estilo da Visão de Detalhes */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+}
+
+.logo-container img { max-width: 150px; }
+
+#back-to-grid-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#back-to-grid-btn:hover {
+    background-color: var(--text-dark);
+    color: white;
+}
+
+#presentation-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Re-estilização dos detalhes (copiado da versão anterior com ajustes) */
+#presentation-container .slide { display: none; padding: 0; animation: fadeIn 0.5s; }
+#presentation-container .slide.active { display: block; }
+#presentation-container .slide h2 { font-size: 2.5rem; font-weight: 600; color: var(--text-dark); margin-bottom: 30px; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; }
+.luminaire-item { display: flex; gap: 30px; background-color: #fdfdfd; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
+.luminaire-info { flex: 3; }
+.luminaire-info h4 { font-size: 1.3rem; font-weight: 600; color: var(--text-dark); margin-bottom: 15px; display: flex; align-items: center; }
+.luminaire-info .material-symbols-outlined { margin-right: 12px; font-size: 1.8rem; color: var(--primary-color); }
+.quantity-selector { margin-bottom: 15px; display: flex; align-items: center; }
+.quantity-selector label { font-weight: 600; margin-right: 10px; }
+.quantity-selector input[type="number"] { width: 70px; padding: 8px; border: 1px solid #dde2e7; border-radius: 6px; font-size: 1rem; text-align: center; }
+textarea { width: 100%; min-height: 140px; border: 1px solid #dde2e7; border-radius: 6px; padding: 12px; font-size: 0.9rem; line-height: 1.6; background-color: var(--bg-light); resize: vertical; }
+.luminaire-image-placeholder { flex: 2; background-color: #ecf0f1; border: 2px dashed #bdc3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 200px; }
+.luminaire-image-placeholder p { color: var(--text-light); padding: 20px; }
+
+@media (max-width: 768px) {
+    #grid-view, #detail-view { padding: 20px; }
+    .main-header .subtitle { flex-direction: column; gap: 5px; text-align: left;}
+    .luminaire-item { flex-direction: column; }
+    .detail-header { flex-direction: column; gap: 20px; text-align: center; }
+}
