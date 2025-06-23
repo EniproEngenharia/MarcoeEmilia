@@ -41,12 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- ESTADO DA APLICAÇÃO ---
-    // Agora 'data' começa vazio e será preenchido com os dados do Firebase
     let data = [];
 
     // --- FUNÇÕES ---
 
-    // Salva os dados no Firebase Realtime Database
+    // Salva a estrutura de dados completa no Firebase
     const saveData = () => {
         database.ref('productData').set(data);
     };
@@ -56,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
         categoriesContainer.innerHTML = '';
         viewerContainer.innerHTML = '';
         
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
+            data = [];
             categoriesContainer.innerHTML = '<p>Nenhum ambiente criado ainda. Adicione um acima.</p>';
             viewerContainer.innerHTML = '<p>Nenhum produto para visualização no momento.</p>';
         }
@@ -77,13 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardsGridEditor = categorySectionEditor.querySelector('.cards-grid');
             const cardsGridViewer = categorySectionViewer.querySelector('.cards-grid');
 
-            // Garante que 'cards' seja um array para evitar erros.
             const cards = category.cards || [];
 
             cards.forEach(card => {
-                // Renderiza card no editor (com botões de editar/excluir)
                 cardsGridEditor.appendChild(createCardElement(card, false));
-                // Renderiza card no visualizador (com botões de aprovar/reprovar)
                 cardsGridViewer.appendChild(createCardElement(card, true));
             });
         });
@@ -97,15 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cardDiv.className = 'card';
         cardDiv.dataset.id = card.id;
 
-        // --- ALTERAÇÃO 2: APLICAR A CLASSE DE STATUS AO RENDERIZAR O CARD ---
-        // Se o card tiver um status salvo, aplica a classe correspondente para dar a cor.
         if (card.status === 'approved') {
             cardDiv.classList.add('approved');
         } else if (card.status === 'rejected') {
             cardDiv.classList.add('rejected');
         }
 
-        // Conteúdo principal do card (imagem, descrição)
         cardDiv.innerHTML = `
             <img src="${card.image}" alt="${card.description}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/f2eee9/5a7d7c?text=Imagem';">
             <div class="card-content">
@@ -114,9 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // Adiciona botões específicos para cada visualização
         if (isViewer) {
-            // Botões para o Cliente: Aprovar/Reprovar
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'card-actions-viewer';
             actionsDiv.innerHTML = `
@@ -125,11 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             cardDiv.appendChild(actionsDiv);
         } else {
-            // Botões para o Editor: Editar/Excluir
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'card-actions-editor';
             actionsDiv.innerHTML = `
-                <button class="edit-btn" title="Editar">&#9998;</button> <button class="delete-btn" title="Excluir">&times;</button> `;
+                <button class="edit-btn" title="Editar">&#9998;</button>
+                <button class="delete-btn" title="Excluir">&times;</button>
+            `;
             cardDiv.appendChild(actionsDiv);
         }
         return cardDiv;
@@ -137,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Atualiza o dropdown de categorias no modal de formulário
     const updateCategoryDropdown = () => {
-        const hasCategories = data.length > 0;
+        const hasCategories = data && data.length > 0;
         showCardModalBtn.style.display = hasCategories ? 'inline-block' : 'none';
         cardCategorySelect.innerHTML = '';
 
@@ -157,12 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const openFormModal = (cardId = null) => {
         addCardForm.reset();
         if (cardId) {
-            // Modo de Edição
             modalTitle.textContent = 'Editar Produto';
             saveCardBtn.textContent = 'Salvar Alterações';
             cardIdEditInput.value = cardId;
 
-            // Encontra o card e preenche o formulário
             let cardToEdit, categoryOfCard;
             for(const category of data) {
                 const cards = category.cards || [];
@@ -181,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('card-description').value = cardToEdit.description;
             }
         } else {
-            // Modo de Adição
             modalTitle.textContent = 'Adicionar Novo Produto';
             saveCardBtn.textContent = 'Salvar Produto';
             cardIdEditInput.value = '';
@@ -194,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
         addCardModal.style.display = 'none';
     };
 
-    // --- Funções do Modal de Imagem ---
     const openImageModal = (src) => {
         modalImage.src = src;
         imageViewerModal.style.display = 'flex';
@@ -206,27 +195,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- MANIPULADORES DE EVENTOS ---
 
-    // Adicionar nova categoria
     addCategoryForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const categoryName = categoryNameInput.value.trim();
         if (categoryName && !data.some(cat => cat.name === categoryName)) {
             data.push({ name: categoryName, cards: [] });
             saveData();
-            // render() será chamado pelo listener do Firebase
             categoryNameInput.value = '';
         } else {
             alert('Nome de ambiente inválido ou já existente.');
         }
     });
 
-    // Abrir o modal para ADICIONAR card
     showCardModalBtn.addEventListener('click', () => openFormModal());
 
-    // Fechar o modal de formulário
     cancelCardBtn.addEventListener('click', closeFormModal);
 
-    // Salvar card (novo ou editado)
     addCardForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const cardId = cardIdEditInput.value;
@@ -236,9 +220,31 @@ document.addEventListener('DOMContentLoaded', () => {
             image: document.getElementById('card-image').value,
             quantity: document.getElementById('card-quantity').value,
             description: document.getElementById('card-description').value,
-            // --- ALTERAÇÃO 1: ADICIONAR UM STATUS PADRÃO AO CRIAR UM NOVO CARD ---
-            status: 'pending' // Novo card começa como pendente
+            status: 'pending'
         };
 
         if (cardId) {
-            // Editando um card existente
+            let oldStatus = 'pending';
+            data.forEach(cat => {
+                if (cat.cards) {
+                    const cardIndex = cat.cards.findIndex(c => c.id === cardId);
+                    if(cardIndex > -1) {
+                        oldStatus = cat.cards[cardIndex].status;
+                        cat.cards.splice(cardIndex, 1);
+                    }
+                }
+            });
+            cardData.status = oldStatus;
+        } 
+        
+        const newCategory = data.find(cat => cat.name === newCategoryName);
+        if (newCategory) {
+            if (!newCategory.cards) {
+                newCategory.cards = [];
+            }
+            newCategory.cards.push(cardData);
+        }
+
+        saveData();
+        closeFormModal();
+    });
