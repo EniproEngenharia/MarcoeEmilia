@@ -97,6 +97,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cardDiv.className = 'card';
         cardDiv.dataset.id = card.id;
 
+        // --- ALTERAÇÃO 2: APLICAR A CLASSE DE STATUS AO RENDERIZAR O CARD ---
+        // Se o card tiver um status salvo, aplica a classe correspondente para dar a cor.
+        if (card.status === 'approved') {
+            cardDiv.classList.add('approved');
+        } else if (card.status === 'rejected') {
+            cardDiv.classList.add('rejected');
+        }
+
         // Conteúdo principal do card (imagem, descrição)
         cardDiv.innerHTML = `
             <img src="${card.image}" alt="${card.description}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/f2eee9/5a7d7c?text=Imagem';">
@@ -205,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (categoryName && !data.some(cat => cat.name === categoryName)) {
             data.push({ name: categoryName, cards: [] });
             saveData();
-            render();
+            // render() será chamado pelo listener do Firebase
             categoryNameInput.value = '';
         } else {
             alert('Nome de ambiente inválido ou já existente.');
@@ -227,113 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
             id: cardId || 'card-' + Date.now(),
             image: document.getElementById('card-image').value,
             quantity: document.getElementById('card-quantity').value,
-            description: document.getElementById('card-description').value
+            description: document.getElementById('card-description').value,
+            // --- ALTERAÇÃO 1: ADICIONAR UM STATUS PADRÃO AO CRIAR UM NOVO CARD ---
+            status: 'pending' // Novo card começa como pendente
         };
 
         if (cardId) {
-            // Editando um card existente: remove o card da categoria antiga
-            data.forEach(cat => {
-                if (cat.cards) {
-                    const cardIndex = cat.cards.findIndex(c => c.id === cardId);
-                    if(cardIndex > -1) {
-                        cat.cards.splice(cardIndex, 1);
-                    }
-                }
-            });
-        } 
-        
-        // Adiciona o card (novo ou movido) à categoria correta
-        const newCategory = data.find(cat => cat.name === newCategoryName);
-        if (newCategory) {
-            // Se a categoria ainda não tiver a propriedade 'cards', cria ela
-            if (!newCategory.cards) {
-                newCategory.cards = [];
-            }
-            newCategory.cards.push(cardData);
-        }
-
-        saveData();
-        render();
-        closeFormModal();
-    });
-
-    // Ações no container do EDITOR (Editar/Excluir)
-    categoriesContainer.addEventListener('click', (e) => {
-        const cardElement = e.target.closest('.card');
-        if (!cardElement) return;
-
-        const cardId = cardElement.dataset.id;
-        
-        if (e.target.classList.contains('edit-btn')) {
-            openFormModal(cardId);
-        }
-
-        if (e.target.classList.contains('delete-btn')) {
-            if (confirm('Tem certeza que deseja excluir este produto?')) {
-                data.forEach(category => {
-                    // Garante que 'cards' exista antes de tentar filtrar
-                    if (category.cards) {
-                       category.cards = category.cards.filter(card => card.id !== cardId);
-                    }
-                });
-                saveData();
-                render();
-            }
-        }
-    });
-
-    // Ações no container do CLIENTE (Aprovar/Reprovar/Ver Imagem)
-    viewerView.addEventListener('click', (e) => {
-        const cardElement = e.target.closest('.card');
-        if (!cardElement) return;
-
-        // Se clicar na IMAGEM do card, abre o modal de imagem
-        if (e.target.tagName === 'IMG') {
-            openImageModal(e.target.src);
-            return; 
-        }
-
-        // Se clicar nos botões de ação
-        if (e.target.classList.contains('approve-btn')) {
-            cardElement.classList.remove('rejected');
-            cardElement.classList.add('approved');
-        } else if (e.target.classList.contains('reject-btn')) {
-            cardElement.classList.remove('approved');
-            cardElement.classList.add('rejected');
-        }
-    });
-
-    // Eventos do Modal de Imagem
-    closeImageModalBtn.addEventListener('click', closeImageModal);
-
-    imageViewerModal.addEventListener('click', (e) => {
-        // Fecha o modal se o clique for no fundo (overlay) e não na imagem
-        if (e.target === imageViewerModal) {
-            closeImageModal();
-        }
-    });
-
-
-    // --- INICIALIZAÇÃO ---
-    const init = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('view') === 'true') {
-            editorView.style.display = 'none';
-            viewerView.style.display = 'block';
-        } else {
-            editorView.style.display = 'block';
-            viewerView.style.display = 'none';
-        }
-
-        // Puxa os dados do Firebase ao iniciar
-        database.ref('productData').on('value', (snapshot) => {
-            const firebaseData = snapshot.val();
-            // Se houver dados no Firebase, usa eles. Senão, usa um array vazio.
-            data = firebaseData || [];
-            // **IMPORTANTE**: Renderiza a página somente DEPOIS que os dados foram carregados
-            render();
-        });
-    };
-
-    init();
-});
+            // Editando um card existente
