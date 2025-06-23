@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ESTADO LOCAL DA APLICAÇÃO (será um espelho dos dados do Firebase) ---
     let localData = [];
 
-    // --- NOVA LÓGICA DE RENDERIZAÇÃO ---
+    // --- LÓGICA DE RENDERIZAÇÃO ---
     const render = (data) => {
         localData = data; // Atualiza o estado local
         categoriesContainer.innerHTML = '';
@@ -72,11 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCategoryDropdown(data);
     };
     
-    // --- NOVA LÓGICA PARA CRIAR O ELEMENTO CARD ---
+    // --- LÓGICA PARA CRIAR O ELEMENTO CARD ---
     const createCardElement = (card, categoryId, isViewer) => {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
-        // Armazena o ID da categoria e do card no próprio elemento
         cardDiv.dataset.id = card.id;
         cardDiv.dataset.categoryId = categoryId;
 
@@ -105,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cardDiv;
     };
 
-    // --- NOVA LÓGICA PARA ATUALIZAR O DROPDOWN ---
+    // --- LÓGICA PARA ATUALIZAR O DROPDOWN ---
     const updateCategoryDropdown = (data) => {
         const hasCategories = data && data.length > 0;
         showCardModalBtn.style.display = hasCategories ? 'inline-block' : 'none';
@@ -116,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             data.forEach(category => {
                 const option = document.createElement('option');
-                // O valor da opção agora é o ID único da categoria
                 option.value = category.id;
                 option.textContent = category.name;
                 cardCategorySelect.appendChild(option);
@@ -124,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // --- LÓGICA DE MODAIS (sem grandes alterações) ---
+    // --- LÓGICA DE MODAIS ---
     const openFormModal = (cardToEdit = null, categoryId = null) => {
         addCardForm.reset();
         if (cardToEdit && categoryId) {
@@ -146,17 +144,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const openImageModal = (src) => { imageViewerModal.style.display = 'flex'; modalImage.src = src; };
     const closeImageModal = () => imageViewerModal.style.display = 'none';
 
-    // --- NOVOS MANIPULADORES DE EVENTOS (MAIS ROBUSTOS) ---
+    // --- MANIPULADORES DE EVENTOS ---
 
     // Adicionar novo ambiente
     addCategoryForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const categoryName = categoryNameInput.value.trim();
         if (categoryName) {
-            // Usa o método push() do Firebase para criar um ID único
-            database.ref('productData').push({
-                name: categoryName
-            });
+            database.ref('productData').push({ name: categoryName });
             categoryNameInput.value = '';
         }
     });
@@ -173,17 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
             description: document.getElementById('card-description').value,
             status: 'pending'
         };
-        // Define o card usando seu ID único dentro da categoria correta
         database.ref(`productData/${categoryId}/cards/${cardId}`).set(cardData);
         closeFormModal();
     });
 
-    // Ações no container do EDITOR (Editar, Excluir Card, Excluir Categoria)
+    // Ações no container do EDITOR
     categoriesContainer.addEventListener('click', (e) => {
         const target = e.target;
         const cardElement = target.closest('.card');
         
-        // Excluir Categoria Inteira
         if (target.classList.contains('delete-category-btn')) {
             const categoryId = target.dataset.categoryId;
             if (confirm('Tem certeza que deseja excluir este ambiente e TODOS os seus produtos?')) {
@@ -196,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardId = cardElement.dataset.id;
         const categoryId = cardElement.dataset.categoryId;
 
-        // Encontra o card nos dados locais para edição
         const category = localData.find(c => c.id === categoryId);
         const card = category?.cards?.find(c => c.id === cardId);
 
@@ -209,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ações no container do CLIENTE (Aprovar, Reprovar)
+    // Ações no container do CLIENTE
     viewerView.addEventListener('click', (e) => {
         const cardElement = e.target.closest('.card');
         if (!cardElement) return;
@@ -224,10 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const isApprove = e.target.classList.contains('approve-btn');
         const isReject = e.target.classList.contains('reject-btn');
 
-        if (isApprove || isReject) {
+        if ((isApprove || isReject) && categoryId && cardId) {
             const newStatus = isApprove ? 'approved' : 'rejected';
-            // Atualiza diretamente o status do card no Firebase
-            database.ref(`productData/${categoryId}/cards/${cardId}/status`).set(newStatus);
+            
+            // --- CORREÇÃO 1: USAR O MÉTODO UPDATE, MAIS SEGURO ---
+            const updates = {};
+            updates[`/productData/${categoryId}/cards/${cardId}/status`] = newStatus;
+            database.ref().update(updates);
         }
     });
 
@@ -250,19 +245,21 @@ document.addEventListener('DOMContentLoaded', () => {
             viewerView.style.display = 'none';
         }
 
-        // Listener principal que sincroniza a aplicação com o Firebase
         database.ref('productData').on('value', (snapshot) => {
             const firebaseData = snapshot.val();
             const dataForRender = [];
             
-            // Converte o objeto do Firebase em um array para renderização
             if (firebaseData) {
                 for (const categoryId in firebaseData) {
                     const category = firebaseData[categoryId];
                     const cardsArray = [];
                     if (category.cards) {
                         for (const cardId in category.cards) {
-                            cardsArray.push(category.cards[cardId]);
+                            const card = category.cards[cardId];
+                            // --- CORREÇÃO 2: VERIFICA SE O CARD É VÁLIDO ANTES DE ADICIONÁ-LO ---
+                            if (card && card.id) {
+                                cardsArray.push(card);
+                            }
                         }
                     }
                     dataForRender.push({
@@ -272,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             }
-            // Chama a função de renderização com os dados convertidos e atualizados
             render(dataForRender);
         });
     };
