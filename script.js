@@ -82,10 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (card.status === 'approved') cardDiv.classList.add('approved');
         if (card.status === 'rejected') cardDiv.classList.add('rejected');
 
+        // --- ALTERAÇÃO 1: MOSTRAR O NOME E A DESCRIÇÃO ---
+        // Adiciona um fallback '...' para o caso de itens antigos não terem o campo 'name'
         cardDiv.innerHTML = `
             <img src="${card.image}" alt="${card.description}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/f2eee9/5a7d7c?text=Imagem';">
             <div class="card-content">
-                <h3>${card.description}</h3>
+                <h3>${card.name || '...'}</h3>
+                <p class="description">${card.description}</p>
                 <p>Quantidade: ${card.quantity}</p>
             </div>
         `;
@@ -131,8 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
             cardIdEditInput.value = cardToEdit.id;
             document.getElementById('card-category').value = categoryId;
             document.getElementById('card-image').value = cardToEdit.image;
-            document.getElementById('card-quantity').value = cardToEdit.quantity;
+            // --- ALTERAÇÃO 2: PREENCHER O CAMPO DE NOME AO EDITAR ---
+            document.getElementById('card-name').value = cardToEdit.name || '';
             document.getElementById('card-description').value = cardToEdit.description;
+            document.getElementById('card-quantity').value = cardToEdit.quantity;
         } else {
             modalTitle.textContent = 'Adicionar Novo Produto';
             saveCardBtn.textContent = 'Salvar Produto';
@@ -155,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- ALTERAÇÃO 3: SALVAR O NOVO CAMPO 'NAME' NO FIREBASE ---
     addCardForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const categoryId = document.getElementById('card-category').value;
@@ -162,8 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardData = {
             id: cardId,
             image: document.getElementById('card-image').value,
-            quantity: document.getElementById('card-quantity').value,
+            name: document.getElementById('card-name').value, // <-- Adicionado
             description: document.getElementById('card-description').value,
+            quantity: document.getElementById('card-quantity').value,
             status: 'pending'
         };
         database.ref(`productData/${categoryId}/cards/${cardId}`).set(cardData);
@@ -198,32 +205,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // --- VERSÃO DE DEPURAÇÃO: BOTÕES APROVAR/REPROVAR ---
     viewerView.addEventListener('click', (e) => {
-        console.log("--- CLIQUE DETECTADO NA ÁREA DO CLIENTE ---");
         const target = e.target;
-        console.log("Elemento exato que foi clicado (target):", target);
+        const cardElement = target.closest('.card');
+
+        if (!cardElement) return;
+        
+        if (target.tagName === 'IMG') {
+            openImageModal(target.src);
+            return;
+        }
 
         const isApprove = target.classList.contains('approve-btn');
         const isReject = target.classList.contains('reject-btn');
 
         if (isApprove || isReject) {
-            console.log("É um botão de APROVAR ou REPROVAR.");
-            const cardElement = target.closest('.card');
-            console.log("Tentando encontrar o 'card' pai...", cardElement);
-
-            if (!cardElement) {
-                console.error("ERRO: Não foi possível encontrar o elemento .card pai do botão. Encerrando.");
-                return;
-            }
-
-            const cardId = cardElement.dataset.id;
-            const categoryId = cardElement.dataset.categoryId;
-
-            console.log(`ID do Card encontrado: '${cardId}' (tipo: ${typeof cardId})`);
-            console.log(`ID da Categoria encontrado: '${categoryId}' (tipo: ${typeof categoryId})`);
-
-            // MUDANÇA VISUAL IMEDIATA
             if (isApprove) {
                 cardElement.classList.remove('rejected');
                 cardElement.classList.add('approved');
@@ -231,38 +227,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardElement.classList.remove('approved');
                 cardElement.classList.add('rejected');
             }
-            console.log("Aparência do card atualizada na tela.");
 
-            // TENTATIVA DE SALVAR NO FIREBASE
+            const cardId = cardElement.dataset.id;
+            const categoryId = cardElement.dataset.categoryId;
+
             if (cardId && categoryId) {
                 const newStatus = isApprove ? 'approved' : 'rejected';
                 const updates = {};
-                const path = `/productData/${categoryId}/cards/${cardId}/status`;
-                updates[path] = newStatus;
-                
-                console.log("Preparando para enviar os seguintes dados para o Firebase:");
-                console.log("Caminho (path):", path);
-                console.log("Valor (status):", newStatus);
-                
-                database.ref().update(updates)
-                    .then(() => {
-                        console.log("SUCESSO: Firebase confirmou que os dados foram salvos!");
-                    })
-                    .catch((error) => {
-                        console.error("FALHA: Ocorreu um erro ao tentar salvar no Firebase:", error);
-                    });
-
-            } else {
-                console.error("ERRO CRÍTICO: ID do card ou da categoria está faltando. A atualização não pode ser enviada ao Firebase.");
+                updates[`/productData/${categoryId}/cards/${cardId}/status`] = newStatus;
+                database.ref().update(updates);
             }
-        } else if (target.tagName === 'IMG') {
-            console.log("É uma imagem. Abrindo o modal.");
-            openImageModal(target.src);
-        } else {
-            console.log("O clique não foi em um botão de ação nem na imagem.");
         }
     });
-
 
     // Demais eventos
     showCardModalBtn.addEventListener('click', () => openFormModal());
