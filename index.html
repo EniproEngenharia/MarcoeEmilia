@@ -3,72 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto de Iluminação - ENIPRO</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>Seleção de Produtos</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <main id="grid-view" class="active-view">
-        <div class="main-header">
-            <h1>Projeto de Iluminação</h1>
-            <div class="subtitle">
-                <span>Estilo: Minimalista</span>
-                <span>Clique em um cômodo para ver detalhes</span>
-            </div>
-        </div>
-        <div class="room-grid">
-            <div class="room-card" data-room-index="0"><div class="card-illustration ill-garagem"></div><h3>Garagem</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="1"><div class="card-illustration ill-circ-externa"></div><h3>Circulação Externa</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="2"><div class="card-illustration ill-area-externa"></div><h3>Área Externa</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="3"><div class="card-illustration ill-jardim"></div><h3>Jardim</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="4"><div class="card-illustration ill-solario"></div><h3>Solário</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="5"><div class="card-illustration ill-sala-tv"></div><h3>Sala de TV</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="6"><div class="card-illustration ill-sala-jantar"></div><h3>Sala de Jantar</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="7"><div class="card-illustration ill-cozinha"></div><h3>Cozinha</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="8"><div class="card-illustration ill-area-gourmet"></div><h3>Área Gourmet</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="9"><div class="card-illustration ill-lavanderia"></div><h3>Lavanderia</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="10"><div class="card-illustration ill-banho-social"></div><h3>Banho Social</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="11"><div class="card-illustration ill-circ-intima"></div><h3>Circulação Íntima</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="12"><div class="card-illustration ill-deposito"></div><h3>Depósito / Hóspedes 2</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="13"><div class="card-illustration ill-office"></div><h3>Dormitório / Office</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="14"><div class="card-illustration ill-banho-hospedes"></div><h3>Banho Hóspedes</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="15"><div class="card-illustration ill-suite-master"></div><h3>Suíte Master</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="16"><div class="card-illustration ill-banho-casal"></div><h3>Banho Casal</h3><p>Clique para ver detalhes</p></div>
-            <div class="room-card" data-room-index="17"><div class="card-illustration ill-lavabo-externo"></div><h3>Lavabo Externo</h3><p>Clique para ver detalhes</p></div>
-        </div>
-    </main>
+    <!-- Visualização do Editor -->
+    <div id="editor-view">
+        <header>
+            <h1>Editor de Produtos</h1>
+            <a href="?view=true" class="view-button">Visualizar como Cliente</a>
+        </header>
 
-    <div id="detail-view">
-        <div class="detail-header">
-            <div class="logo-container">
-                <img src="enipro.png" alt="Logo ENIPRO Engenharia">
+        <main>
+            <section class="controls">
+                <form id="add-category-form">
+                    <input type="text" id="category-name-input" placeholder="Nome do novo ambiente (ex: Cozinha)" required>
+                    <button type="submit">Criar Ambiente</button>
+                </form>
+                <button id="show-card-modal-btn">Adicionar Produto</button>
+            </section>
+
+            <div id="categories-container">
+                <!-- As categorias e cards do editor serão inseridos aqui pelo JS -->
             </div>
-            <button id="back-to-grid-btn"><span class="material-symbols-outlined">arrow_back</span> Voltar ao Painel</button>
+        </main>
+    </div>
+
+    <!-- Visualização do Cliente -->
+    <div id="viewer-view">
+        <header>
+            <h1>Seleção de Produtos para Aprovação</h1>
+            <img src="enipro.png" alt="Logo da Empresa" class="header-logo">
+        </header>
+        <main id="viewer-container">
+            <!-- As categorias e cards do cliente serão inseridos aqui pelo JS -->
+        </main>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Produto -->
+    <div id="add-card-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <form id="add-card-form">
+                <h2 id="modal-title">Adicionar Novo Produto</h2>
+                <input type="hidden" id="card-id-edit"> <!-- Campo oculto para guardar o ID do card em edição -->
+
+                <label for="card-category">Selecione o Ambiente:</label>
+                <select id="card-category" required>
+                    <!-- Opções de categoria inseridas pelo JS -->
+                </select>
+
+                <label for="card-image">URL da Imagem:</label>
+                <input type="url" id="card-image" placeholder="https://exemplo.com/imagem.jpg" required>
+
+                <label for="card-quantity">Quantidade:</label>
+                <input type="number" id="card-quantity" value="1" min="1" required>
+
+                <label for="card-description">Descrição do Produto:</label>
+                <textarea id="card-description" rows="3" placeholder="Ex: Sofá 3 lugares, tecido linho cinza" required></textarea>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancel-card-btn">Cancelar</button>
+                    <button type="submit" id="save-card-btn">Salvar Produto</button>
+                </div>
+            </form>
         </div>
-        <div id="presentation-container">
-             <div class="slide" data-slide-index="0"><h2>Garagem</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DE EMBUTIR SIMPLES</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="1"><h2>Circulação Externa</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 1 (EXTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="2"><h2>Área Externa</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 1 (EXTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 4 (INTERNA PARA ÁREA MOLHADA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 3 (INTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">grass</span>ESPETO DE JARDIM</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="3"><h2>Jardim</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 1 (EXTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="4"><h2>Solário</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 1 (EXTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">grass</span>ESPETO DE JARDIM</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="5"><h2>Sala de TV</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">hanging</span>PENDENTE TIPO 2</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 2 (INTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="6"><h2>Sala de Jantar</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">hanging</span>PENDENTE TIPO 1</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 2 (INTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">grass</span>ESPETO DE JARDIM</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="7"><h2>Cozinha</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">horizontal_rule</span>PERFIL DE LED</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="8"><h2>Área Gourmet</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">hanging</span>PENDENTE TIPO 4</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">horizontal_rule</span>PERFIL DE LED</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="9"><h2>Lavanderia</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="10"><h2>Banho Social</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="11"><h2>Circulação Íntima</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 2 (INTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="12"><h2>Depósito / Hóspedes 2</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">ceiling</span>PLAFON QUADRADO DE EMBUTIR 50x50cm</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">horizontal_rule</span>PERFIL DE LED</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="13"><h2>Dormitório / Office</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">ceiling</span>PLAFON QUADRADO DE EMBUTIR 50x50cm</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">horizontal_rule</span>PERFIL DE LED</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="14"><h2>Banho Hóspedes</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="15"><h2>Suíte Master</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">hanging</span>PENDENTE TIPO 3</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">wall_lamp</span>ARANDELA TIPO 2 (INTERNA)</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">ceiling</span>PLAFON QUADRADO DE EMBUTIR 50x50cm</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">horizontal_rule</span>PERFIL DE LED</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="16"><h2>Banho Casal</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-            <div class="slide" data-slide-index="17"><h2>Lavabo Externo</h2><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT INDIVIDUAL PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div><div class="luminaire-item"><div class="luminaire-info"><h4><span class="material-symbols-outlined">lightbulb</span>SPOT DUPLO PAR 20 DE EMBUTIR</h4><div class="quantity-selector"><label>Quantidade:</label><input type="number" min="1" value="1"></div><textarea placeholder="Clique para preencher as informações técnicas..."></textarea></div><div class="luminaire-image-placeholder"><p>Foto da Luminária</p></div></div></div>
-        </div>
+    </div>
+
+    <!-- Modal para Visualizar Imagem Ampliada -->
+    <div id="image-viewer-modal" class="modal-overlay" style="display: none;">
+        <span class="close-image-modal">&times;</span>
+        <img class="modal-image-content" id="modal-image" alt="Imagem do Produto Ampliada">
     </div>
 
     <script src="script.js"></script>
