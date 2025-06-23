@@ -34,12 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalImage = document.getElementById('modal-image');
     const closeImageModalBtn = document.querySelector('.close-image-modal');
 
-    // --- ESTADO LOCAL DA APLICAÇÃO (será um espelho dos dados do Firebase) ---
+    // --- ESTADO LOCAL DA APLICAÇÃO ---
     let localData = [];
 
     // --- LÓGICA DE RENDERIZAÇÃO ---
     const render = (data) => {
-        localData = data; // Atualiza o estado local
+        localData = data;
         categoriesContainer.innerHTML = '';
         viewerContainer.innerHTML = '';
 
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         updateCategoryDropdown(data);
     };
-    
+
     // --- LÓGICA PARA CRIAR O ELEMENTO CARD ---
     const createCardElement = (card, categoryId, isViewer) => {
         const cardDiv = document.createElement('div');
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-    
+
     // --- LÓGICA DE MODAIS ---
     const openFormModal = (cardToEdit = null, categoryId = null) => {
         addCardForm.reset();
@@ -146,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- MANIPULADORES DE EVENTOS ---
 
-    // Adicionar novo ambiente
     addCategoryForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const categoryName = categoryNameInput.value.trim();
@@ -156,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Salvar (adicionar ou editar) um produto
     addCardForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const categoryId = document.getElementById('card-category').value;
@@ -172,11 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
         closeFormModal();
     });
 
-    // Ações no container do EDITOR
     categoriesContainer.addEventListener('click', (e) => {
         const target = e.target;
         const cardElement = target.closest('.card');
-        
+
         if (target.classList.contains('delete-category-btn')) {
             const categoryId = target.dataset.categoryId;
             if (confirm('Tem certeza que deseja excluir este ambiente e TODOS os seus produtos?')) {
@@ -200,29 +197,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    // Ações no container do CLIENTE
+    
+    // --- MUDANÇA CRÍTICA: NOVA ABORDAGEM PARA OS BOTÕES APROVAR/REPROVAR ---
     viewerView.addEventListener('click', (e) => {
-        const cardElement = e.target.closest('.card');
-        if (!cardElement) return;
+        const target = e.target;
+        const cardElement = target.closest('.card');
 
-        if (e.target.tagName === 'IMG') {
-            openImageModal(e.target.src);
+        // Se não encontrou um card, não faz nada
+        if (!cardElement) return;
+        
+        // Se clicou na imagem, abre o modal
+        if (target.tagName === 'IMG') {
+            openImageModal(target.src);
             return;
         }
-        
-        const cardId = cardElement.dataset.id;
-        const categoryId = cardElement.dataset.categoryId;
-        const isApprove = e.target.classList.contains('approve-btn');
-        const isReject = e.target.classList.contains('reject-btn');
 
-        if ((isApprove || isReject) && categoryId && cardId) {
-            const newStatus = isApprove ? 'approved' : 'rejected';
-            
-            // --- CORREÇÃO 1: USAR O MÉTODO UPDATE, MAIS SEGURO ---
-            const updates = {};
-            updates[`/productData/${categoryId}/cards/${cardId}/status`] = newStatus;
-            database.ref().update(updates);
+        const isApprove = target.classList.contains('approve-btn');
+        const isReject = target.classList.contains('reject-btn');
+
+        if (isApprove || isReject) {
+            // Passo 1: Mudar a cor na tela IMEDIATAMENTE
+            if (isApprove) {
+                cardElement.classList.remove('rejected');
+                cardElement.classList.add('approved');
+            } else { // isReject
+                cardElement.classList.remove('approved');
+                cardElement.classList.add('rejected');
+            }
+
+            // Passo 2: Salvar no Firebase em segundo plano
+            const cardId = cardElement.dataset.id;
+            const categoryId = cardElement.dataset.categoryId;
+
+            if (cardId && categoryId) {
+                const newStatus = isApprove ? 'approved' : 'rejected';
+                const updates = {};
+                updates[`/productData/${categoryId}/cards/${cardId}/status`] = newStatus;
+                database.ref().update(updates);
+            }
         }
     });
 
@@ -248,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         database.ref('productData').on('value', (snapshot) => {
             const firebaseData = snapshot.val();
             const dataForRender = [];
-            
+
             if (firebaseData) {
                 for (const categoryId in firebaseData) {
                     const category = firebaseData[categoryId];
@@ -256,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (category.cards) {
                         for (const cardId in category.cards) {
                             const card = category.cards[cardId];
-                            // --- CORREÇÃO 2: VERIFICA SE O CARD É VÁLIDO ANTES DE ADICIONÁ-LO ---
                             if (card && card.id) {
                                 cardsArray.push(card);
                             }
