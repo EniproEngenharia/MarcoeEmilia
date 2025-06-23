@@ -198,45 +198,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // --- MUDANÇA CRÍTICA: NOVA ABORDAGEM PARA OS BOTÕES APROVAR/REPROVAR ---
+    // --- VERSÃO DE DEPURAÇÃO: BOTÕES APROVAR/REPROVAR ---
     viewerView.addEventListener('click', (e) => {
+        console.log("--- CLIQUE DETECTADO NA ÁREA DO CLIENTE ---");
         const target = e.target;
-        const cardElement = target.closest('.card');
-
-        // Se não encontrou um card, não faz nada
-        if (!cardElement) return;
-        
-        // Se clicou na imagem, abre o modal
-        if (target.tagName === 'IMG') {
-            openImageModal(target.src);
-            return;
-        }
+        console.log("Elemento exato que foi clicado (target):", target);
 
         const isApprove = target.classList.contains('approve-btn');
         const isReject = target.classList.contains('reject-btn');
 
         if (isApprove || isReject) {
-            // Passo 1: Mudar a cor na tela IMEDIATAMENTE
-            if (isApprove) {
-                cardElement.classList.remove('rejected');
-                cardElement.classList.add('approved');
-            } else { // isReject
-                cardElement.classList.remove('approved');
-                cardElement.classList.add('rejected');
+            console.log("É um botão de APROVAR ou REPROVAR.");
+            const cardElement = target.closest('.card');
+            console.log("Tentando encontrar o 'card' pai...", cardElement);
+
+            if (!cardElement) {
+                console.error("ERRO: Não foi possível encontrar o elemento .card pai do botão. Encerrando.");
+                return;
             }
 
-            // Passo 2: Salvar no Firebase em segundo plano
             const cardId = cardElement.dataset.id;
             const categoryId = cardElement.dataset.categoryId;
 
+            console.log(`ID do Card encontrado: '${cardId}' (tipo: ${typeof cardId})`);
+            console.log(`ID da Categoria encontrado: '${categoryId}' (tipo: ${typeof categoryId})`);
+
+            // MUDANÇA VISUAL IMEDIATA
+            if (isApprove) {
+                cardElement.classList.remove('rejected');
+                cardElement.classList.add('approved');
+            } else {
+                cardElement.classList.remove('approved');
+                cardElement.classList.add('rejected');
+            }
+            console.log("Aparência do card atualizada na tela.");
+
+            // TENTATIVA DE SALVAR NO FIREBASE
             if (cardId && categoryId) {
                 const newStatus = isApprove ? 'approved' : 'rejected';
                 const updates = {};
-                updates[`/productData/${categoryId}/cards/${cardId}/status`] = newStatus;
-                database.ref().update(updates);
+                const path = `/productData/${categoryId}/cards/${cardId}/status`;
+                updates[path] = newStatus;
+                
+                console.log("Preparando para enviar os seguintes dados para o Firebase:");
+                console.log("Caminho (path):", path);
+                console.log("Valor (status):", newStatus);
+                
+                database.ref().update(updates)
+                    .then(() => {
+                        console.log("SUCESSO: Firebase confirmou que os dados foram salvos!");
+                    })
+                    .catch((error) => {
+                        console.error("FALHA: Ocorreu um erro ao tentar salvar no Firebase:", error);
+                    });
+
+            } else {
+                console.error("ERRO CRÍTICO: ID do card ou da categoria está faltando. A atualização não pode ser enviada ao Firebase.");
             }
+        } else if (target.tagName === 'IMG') {
+            console.log("É uma imagem. Abrindo o modal.");
+            openImageModal(target.src);
+        } else {
+            console.log("O clique não foi em um botão de ação nem na imagem.");
         }
     });
+
 
     // Demais eventos
     showCardModalBtn.addEventListener('click', () => openFormModal());
