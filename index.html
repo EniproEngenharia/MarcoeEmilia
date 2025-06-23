@@ -8,7 +8,6 @@
 </head>
 <body>
 
-    <!-- Visualização do Editor -->
     <div id="editor-view">
         <header>
             <h1>Editor de Produtos</h1>
@@ -25,33 +24,26 @@
             </section>
 
             <div id="categories-container">
-                <!-- As categorias e cards do editor serão inseridos aqui pelo JS -->
-            </div>
+                </div>
         </main>
     </div>
 
-    <!-- Visualização do Cliente -->
     <div id="viewer-view">
         <header>
             <h1>Seleção de Produtos para Aprovação</h1>
             <img src="enipro.png" alt="Logo da Empresa" class="header-logo">
         </header>
         <main id="viewer-container">
-            <!-- As categorias e cards do cliente serão inseridos aqui pelo JS -->
-        </main>
+            </main>
     </div>
 
-    <!-- Modal para Adicionar/Editar Produto -->
     <div id="add-card-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <form id="add-card-form">
                 <h2 id="modal-title">Adicionar Novo Produto</h2>
-                <input type="hidden" id="card-id-edit"> <!-- Campo oculto para guardar o ID do card em edição -->
-
-                <label for="card-category">Selecione o Ambiente:</label>
+                <input type="hidden" id="card-id-edit"> <label for="card-category">Selecione o Ambiente:</label>
                 <select id="card-category" required>
-                    <!-- Opções de categoria inseridas pelo JS -->
-                </select>
+                    </select>
 
                 <label for="card-image">URL da Imagem:</label>
                 <input type="url" id="card-image" placeholder="https://exemplo.com/imagem.jpg" required>
@@ -70,11 +62,13 @@
         </div>
     </div>
 
-    <!-- Modal para Visualizar Imagem Ampliada -->
     <div id="image-viewer-modal" class="modal-overlay" style="display: none;">
         <span class="close-image-modal">&times;</span>
         <img class="modal-image-content" id="modal-image" alt="Imagem do Produto Ampliada">
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script src="script.js"></script>
 </body>

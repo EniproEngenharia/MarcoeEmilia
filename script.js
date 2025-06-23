@@ -1,3 +1,20 @@
+// --- CONFIGURAÇÃO DO FIREBASE ---
+const firebaseConfig = {
+  apiKey: "AIzaSyD8sNfGilLum2rnN7Qt1fBRP4ONhzemWNE",
+  authDomain: "guilherme-2a3f3.firebaseapp.com",
+  databaseURL: "https://guilherme-2a3f3-default-rtdb.firebaseio.com",
+  projectId: "guilherme-2a3f3",
+  storageBucket: "guilherme-2a3f3.appspot.com",
+  messagingSenderId: "60682599861",
+  appId: "1:60682599861:web:c74a9aaa7651d14cbd2dfc",
+  measurementId: "G-MZSHRPP56K"
+};
+
+// Inicializa o Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- SELETORES DE ELEMENTOS ---
     const editorView = document.getElementById('editor-view');
@@ -24,13 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- ESTADO DA APLICAÇÃO ---
-    let data = JSON.parse(localStorage.getItem('productData')) || [];
+    // Agora 'data' começa vazio e será preenchido com os dados do Firebase
+    let data = [];
 
     // --- FUNÇÕES ---
 
-    // Salva os dados no localStorage
+    // Salva os dados no Firebase Realtime Database
     const saveData = () => {
-        localStorage.setItem('productData', JSON.stringify(data));
+        database.ref('productData').set(data);
     };
 
     // Renderiza a aplicação inteira
@@ -59,7 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardsGridEditor = categorySectionEditor.querySelector('.cards-grid');
             const cardsGridViewer = categorySectionViewer.querySelector('.cards-grid');
 
-            category.cards.forEach(card => {
+            // Garante que 'cards' seja um array para evitar erros.
+            const cards = category.cards || [];
+
+            cards.forEach(card => {
                 // Renderiza card no editor (com botões de editar/excluir)
                 cardsGridEditor.appendChild(createCardElement(card, false));
                 // Renderiza card no visualizador (com botões de aprovar/reprovar)
@@ -100,9 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'card-actions-editor';
             actionsDiv.innerHTML = `
-                <button class="edit-btn" title="Editar">&#9998;</button> <!-- Lápis -->
-                <button class="delete-btn" title="Excluir">&times;</button> <!-- X -->
-            `;
+                <button class="edit-btn" title="Editar">&#9998;</button> <button class="delete-btn" title="Excluir">&times;</button> `;
             cardDiv.appendChild(actionsDiv);
         }
         return cardDiv;
@@ -138,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Encontra o card e preenche o formulário
             let cardToEdit, categoryOfCard;
             for(const category of data) {
-                const foundCard = category.cards.find(c => c.id === cardId);
+                const cards = category.cards || [];
+                const foundCard = cards.find(c => c.id === cardId);
                 if (foundCard) {
                     cardToEdit = foundCard;
                     categoryOfCard = category;
@@ -213,9 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cardId) {
             // Editando um card existente: remove o card da categoria antiga
             data.forEach(cat => {
-                const cardIndex = cat.cards.findIndex(c => c.id === cardId);
-                if(cardIndex > -1) {
-                    cat.cards.splice(cardIndex, 1);
+                if (cat.cards) {
+                    const cardIndex = cat.cards.findIndex(c => c.id === cardId);
+                    if(cardIndex > -1) {
+                        cat.cards.splice(cardIndex, 1);
+                    }
                 }
             });
         } 
@@ -223,6 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Adiciona o card (novo ou movido) à categoria correta
         const newCategory = data.find(cat => cat.name === newCategoryName);
         if (newCategory) {
+            // Se a categoria ainda não tiver a propriedade 'cards', cria ela
+            if (!newCategory.cards) {
+                newCategory.cards = [];
+            }
             newCategory.cards.push(cardData);
         }
 
@@ -245,7 +271,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('delete-btn')) {
             if (confirm('Tem certeza que deseja excluir este produto?')) {
                 data.forEach(category => {
-                    category.cards = category.cards.filter(card => card.id !== cardId);
+                    // Garante que 'cards' exista antes de tentar filtrar
+                    if (category.cards) {
+                       category.cards = category.cards.filter(card => card.id !== cardId);
+                    }
                 });
                 saveData();
                 render();
@@ -295,7 +324,15 @@ document.addEventListener('DOMContentLoaded', () => {
             editorView.style.display = 'block';
             viewerView.style.display = 'none';
         }
-        render();
+
+        // Puxa os dados do Firebase ao iniciar
+        database.ref('productData').on('value', (snapshot) => {
+            const firebaseData = snapshot.val();
+            // Se houver dados no Firebase, usa eles. Senão, usa um array vazio.
+            data = firebaseData || [];
+            // **IMPORTANTE**: Renderiza a página somente DEPOIS que os dados foram carregados
+            render();
+        });
     };
 
     init();
