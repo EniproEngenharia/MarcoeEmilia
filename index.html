@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Territórios S-13</title>
+    <!-- Incluindo o Tailwind CSS para um design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluindo a biblioteca SheetJS (xlsx) para exportar para Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo para garantir que a fonte Inter seja aplicada */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para os placeholders dos inputs de data */
+        input[type="date"]:before {
+            content: attr(placeholder) !important;
+            color: #9ca3af; /* Cor do placeholder do Tailwind (gray-400) */
+            margin-right: 0.5em;
+        }
+        input[type="date"]:focus:before,
+        input[type="date"]:valid:before {
+            content: "";
+        }
+        /* Estilos para a tabela se assemelhar à imagem */
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #000; /* Bordas pretas */
+            padding: 4px 8px; /* Padding menor */
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table-bordered thead th {
+            background-color: #e5e7eb; /* Fundo cinza claro para o cabeçalho */
+            font-weight: bold;
+        }
+        .table-bordered tbody tr td:first-child {
+            background-color: #e5e7eb; /* Fundo cinza para a primeira coluna (Nº Terr.) */
+            font-weight: bold;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        
+        <!-- Cabeçalho da Página -->
+        <header class="text-center mb-4">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-700">Registro de Territórios S-13</h1>
+        </header>
+
+        <div class="text-center mb-8">
+             <button id="open-modal-btn" class="bg-gray-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out">
+                Gerenciar Nomes
+            </button>
+        </div>
+
+        <!-- Formulário para Adicionar Registros -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Adicionar Novo Registro</h2>
+            <form id="registro-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <!-- Campo: Número do Território -->
+                <div>
+                    <label for="territorio-numero" class="block text-sm font-medium text-gray-700 mb-1">Número do Território</label>
+                    <input type="number" id="territorio-numero" placeholder="1-46" min="1" max="46" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <!-- Campo: Nome (agora um select) -->
+                <div>
+                    <label for="nome-select" class="block text-sm font-medium text-gray-700 mb-1">Designado para (Nome)</label>
+                    <select id="nome-select" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        <option value="">Selecione um nome</option>
+                        <!-- Nomes serão adicionados aqui via JS -->
+                    </select>
+                </div>
+                <!-- Campo: Data de Início -->
+                <div>
+                    <label for="data-inicio" class="block text-sm font-medium text-gray-700 mb-1">Data da Designação</label>
+                    <input type="date" id="data-inicio" placeholder="Selecione a data" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <!-- Campo: Data de Conclusão -->
+                <div>
+                    <label for="data-conclusao" class="block text-sm font-medium text-gray-700 mb-1">Data da Conclusão</label>
+                    <input type="date" id="data-conclusao" placeholder="Selecione a data" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <!-- Botão de Adicionar -->
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    Adicionar à Planilha
+                </button>
+            </form>
+        </div>
+
+        <!-- Tabela de Registros -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+             <div class="text-center py-2">
+                <h2 class="text-xl font-bold">Ano de Serviço: 2025</h2>
+            </div>
+            <div class="overflow-x-auto p-4">
+                <table id="planilha" class="w-full table-bordered text-sm">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="w-16">Terr. n.º</th>
+                            <th rowspan="2" class="w-24">Última data concluída</th>
+                            <th colspan="3">Designado para</th>
+                            <th colspan="3">Designado para</th>
+                            <th colspan="3">Designado para</th>
+                            <th colspan="3">Designado para</th>
+                        </tr>
+                        <tr>
+                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
+                        </tr>
+                    </thead>
+                    <tbody id="planilha-corpo">
+                        <!-- As 46 linhas serão geradas aqui via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Botão para Baixar a Planilha -->
+        <div class="mt-8 text-center">
+            <button id="baixar-excel" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                Baixar Planilha (Excel)
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para Gerenciar Nomes -->
+    <div id="names-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md relative">
+            <button id="close-modal-btn" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Gerenciar Publicadores</h2>
+            <form id="add-name-form" class="flex items-end gap-4 mb-4">
+                <div class="flex-grow">
+                    <label for="novo-nome-input" class="block text-sm font-medium text-gray-700 mb-1">Nome do Publicador</label>
+                    <input type="text" id="novo-nome-input" placeholder="Digite um novo nome para cadastrar" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-150 ease-in-out">Cadastrar</button>
+            </form>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Nomes Cadastrados:</h3>
+            <div class="max-h-60 overflow-y-auto border p-2 rounded-md">
+                <ul id="lista-publicadores" class="list-disc list-inside space-y-1">
+                    <!-- Lista de nomes cadastrados -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CONSTANTES E VARIÁVEIS GLOBAIS ---
+            const NUM_TERRITORIOS = 46;
+            const NUM_DESIGNACOES = 4;
+            let publicadores = JSON.parse(localStorage.getItem('publicadoresS13')) || [];
+
+            // --- SELEÇÃO DOS ELEMENTOS DO DOM ---
+            const form = document.getElementById('registro-form');
+            const territorioNumeroInput = document.getElementById('territorio-numero');
+            const nomeSelect = document.getElementById('nome-select');
+            const dataInicioInput = document.getElementById('data-inicio');
+            const dataConclusaoInput = document.getElementById('data-conclusao');
+            const planilhaCorpo = document.getElementById('planilha-corpo');
+            const baixarBtn = document.getElementById('baixar-excel');
+            
+            // Elementos do Modal
+            const openModalBtn = document.getElementById('open-modal-btn');
+            const namesModal = document.getElementById('names-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const addNameForm = document.getElementById('add-name-form');
+            const novoNomeInput = document.getElementById('novo-nome-input');
+            const listaPublicadores = document.getElementById('lista-publicadores');
+
+            // --- FUNÇÕES ---
+
+            /**
+             * Renderiza os nomes cadastrados na lista e no dropdown de seleção.
+             */
+            function renderizarNomes() {
+                nomeSelect.innerHTML = '<option value="">Selecione um nome</option>';
+                listaPublicadores.innerHTML = '';
+
+                publicadores.forEach((nome, index) => {
+                    const option = document.createElement('option');
+                    option.value = nome;
+                    option.textContent = nome;
+                    nomeSelect.appendChild(option);
+
+                    const li = document.createElement('li');
+                    li.textContent = nome;
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'X';
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.title = 'Remover nome';
+                    deleteBtn.dataset.index = index;
+                    li.appendChild(deleteBtn);
+                    listaPublicadores.appendChild(li);
+                });
+            }
+            
+            /**
+             * Adiciona um novo nome à lista de publicadores.
+             */
+            function adicionarNome(event) {
+                event.preventDefault();
+                const novoNome = novoNomeInput.value.trim();
+                if (novoNome && !publicadores.includes(novoNome)) {
+                    publicadores.push(novoNome);
+                    publicadores.sort();
+                    localStorage.setItem('publicadoresS13', JSON.stringify(publicadores));
+                    renderizarNomes();
+                    novoNomeInput.value = '';
+                } else if (publicadores.includes(novoNome)) {
+                    alert('Este nome já está cadastrado.');
+                }
+            }
+
+            /**
+             * Remove um nome da lista de publicadores.
+             */
+            function deletarNome(event) {
+                if (event.target.classList.contains('delete-btn')) {
+                    const index = parseInt(event.target.dataset.index, 10);
+                    const nomeRemovido = publicadores[index];
+                    if (confirm(`Tem certeza que deseja remover "${nomeRemovido}" da lista?`)) {
+                        publicadores.splice(index, 1);
+                        localStorage.setItem('publicadoresS13', JSON.stringify(publicadores));
+                        renderizarNomes();
+                    }
+                }
+            }
+
+            /**
+             * Gera a estrutura inicial da tabela com o número correto de territórios.
+             */
+            function criarTabela() {
+                let html = '';
+                for (let i = 1; i <= NUM_TERRITORIOS; i++) {
+                    html += `<tr id="row-${i}">`;
+                    html += `<td>${i}</td>`;
+                    html += `<td id="t${i}-last-date"></td>`;
+                    for (let j = 1; j <= NUM_DESIGNACOES; j++) {
+                        html += `<td id="t${i}-name-${j}"></td>`;
+                        html += `<td id="t${i}-start-${j}"></td>`;
+                        html += `<td id="t${i}-end-${j}"></td>`;
+                    }
+                    html += `</tr>`;
+                }
+                planilhaCorpo.innerHTML = html;
+            }
+
+            /**
+             * Formata uma data do formato 'YYYY-MM-DD' para 'DD/MM/YYYY'.
+             */
+            function formatarData(dataStr) {
+                if (!dataStr) return '';
+                const [ano, mes, dia] = dataStr.split('-');
+                return `${dia}/${mes}/${ano}`;
+            }
+
+            /**
+             * Adiciona um registro na tabela.
+             */
+            function adicionarRegistroNaTabela() {
+                const territorioNumero = territorioNumeroInput.value;
+                const nome = nomeSelect.value;
+                const dataInicio = dataInicioInput.value;
+                const dataConclusao = dataConclusaoInput.value;
+
+                if (!territorioNumero || !nome || !dataInicio || !dataConclusao) {
+                    alert('Por favor, preencha todos os campos do formulário.');
+                    return;
+                }
+                if (new Date(dataConclusao) < new Date(dataInicio)) {
+                    alert('A data de conclusão não pode ser anterior à data de designação.');
+                    return;
+                }
+
+                let slotEncontrado = false;
+                for (let j = 1; j <= NUM_DESIGNACOES; j++) {
+                    const nomeCell = document.getElementById(`t${territorioNumero}-name-${j}`);
+                    if (nomeCell && nomeCell.innerHTML === '') {
+                        nomeCell.innerHTML = nome;
+                        document.getElementById(`t${territorioNumero}-start-${j}`).innerHTML = formatarData(dataInicio);
+                        document.getElementById(`t${territorioNumero}-end-${j}`).innerHTML = formatarData(dataConclusao);
+                        document.getElementById(`t${territorioNumero}-last-date`).innerHTML = formatarData(dataConclusao);
+                        slotEncontrado = true;
+                        break;
+                    }
+                }
+
+                if (!slotEncontrado) {
+                    alert(`Todas as ${NUM_DESIGNACOES} colunas de designação para o território ${territorioNumero} já estão preenchidas.`);
+                } else {
+                    form.reset();
+                }
+            }
+
+            /**
+             * Exporta os dados da tabela para um arquivo .xlsx.
+             */
+            function exportarParaExcel() {
+                const tabela = document.getElementById('planilha');
+                const workbook = XLSX.utils.table_to_book(tabela, { sheet: "Registros S-13" });
+                XLSX.writeFile(workbook, "REGISTRO_DE_TERRITORIO_S13.xlsx");
+            }
+
+            // --- EVENT LISTENERS ---
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                adicionarRegistroNaTabela();
+            });
+            
+            addNameForm.addEventListener('submit', adicionarNome);
+            listaPublicadores.addEventListener('click', deletarNome);
+            baixarBtn.addEventListener('click', exportarParaExcel);
+
+            // Listeners do Modal
+            openModalBtn.addEventListener('click', () => namesModal.classList.remove('hidden'));
+            closeModalBtn.addEventListener('click', () => namesModal.classList.add('hidden'));
+            namesModal.addEventListener('click', (event) => {
+                if (event.target === namesModal) {
+                    namesModal.classList.add('hidden');
+                }
+            });
+
+            // --- INICIALIZAÇÃO ---
+            criarTabela();
+            renderizarNomes();
+        });
+    </script>
+
+</body>
+</html>
