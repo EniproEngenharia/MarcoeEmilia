@@ -32,13 +32,10 @@
             padding: 4px 8px; /* Padding menor */
             text-align: center;
             vertical-align: middle;
+            height: 30px; /* Altura fixa para as células */
         }
         .table-bordered thead th {
             background-color: #e5e7eb; /* Fundo cinza claro para o cabeçalho */
-            font-weight: bold;
-        }
-        .table-bordered tbody tr td:first-child {
-            background-color: #e5e7eb; /* Fundo cinza para a primeira coluna (Nº Terr.) */
             font-weight: bold;
         }
         .delete-btn {
@@ -48,6 +45,23 @@
             cursor: pointer;
             font-weight: bold;
             margin-left: 10px;
+        }
+        /* Estilo para a célula do nome */
+        .name-cell {
+            font-weight: 500;
+        }
+        /* Cor de fundo para linhas ímpares (branca) */
+        .row-odd td {
+            background-color: #ffffff;
+        }
+        /* Cor de fundo para linhas pares (agora cinza, igual à primeira coluna) */
+        .row-even td {
+            background-color: #e5e7eb; /* Tailwind's gray-200 */
+        }
+        /* A primeira coluna (Terr. n.º) deve manter seu fundo cinza sempre. */
+        .table-bordered tbody tr td[rowspan="2"] {
+            background-color: #e5e7eb;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -111,16 +125,16 @@
                         <tr>
                             <th rowspan="2" class="w-16">Terr. n.º</th>
                             <th rowspan="2" class="w-24">Última data concluída</th>
-                            <th colspan="3">Designado para</th>
-                            <th colspan="3">Designado para</th>
-                            <th colspan="3">Designado para</th>
-                            <th colspan="3">Designado para</th>
+                            <th colspan="2">Designado para</th>
+                            <th colspan="2">Designado para</th>
+                            <th colspan="2">Designado para</th>
+                            <th colspan="2">Designado para</th>
                         </tr>
                         <tr>
-                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
-                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
-                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
-                            <th>Nome</th><th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Data da desig.</th><th>Data da conclusão</th>
+                            <th>Data da desig.</th><th>Data da conclusão</th>
                         </tr>
                     </thead>
                     <tbody id="planilha-corpo">
@@ -244,18 +258,28 @@
             }
 
             /**
-             * Gera a estrutura inicial da tabela com o número correto de territórios.
+             * Gera a estrutura inicial da tabela com o layout de duas linhas por território.
              */
             function criarTabela() {
                 let html = '';
                 for (let i = 1; i <= NUM_TERRITORIOS; i++) {
-                    html += `<tr id="row-${i}">`;
-                    html += `<td>${i}</td>`;
-                    html += `<td id="t${i}-last-date"></td>`;
+                    // Define a classe da linha com base no número do território (par ou ímpar)
+                    const rowClass = i % 2 === 0 ? 'row-even' : 'row-odd';
+
+                    // Primeira linha para o território (nomes)
+                    html += `<tr id="row-${i}-names" class="${rowClass}">`;
+                    html += `<td rowspan="2">${i}</td>`; // Terr. n.º
+                    html += `<td rowspan="2" id="t${i}-last-date"></td>`; // Última data concluída
                     for (let j = 1; j <= NUM_DESIGNACOES; j++) {
-                        html += `<td id="t${i}-name-${j}"></td>`;
-                        html += `<td id="t${i}-start-${j}"></td>`;
-                        html += `<td id="t${i}-end-${j}"></td>`;
+                        html += `<td colspan="2" id="t${i}-name-${j}" class="name-cell"></td>`; // Nome (ocupa 2 colunas)
+                    }
+                    html += `</tr>`;
+
+                    // Segunda linha para o território (datas)
+                    html += `<tr id="row-${i}-dates" class="${rowClass}">`;
+                    for (let j = 1; j <= NUM_DESIGNACOES; j++) {
+                        html += `<td id="t${i}-start-${j}"></td>`; // Data da desig.
+                        html += `<td id="t${i}-end-${j}"></td>`;   // Data da conclusão
                     }
                     html += `</tr>`;
                 }
@@ -263,12 +287,12 @@
             }
 
             /**
-             * Formata uma data do formato 'YYYY-MM-DD' para 'DD/MM/YYYY'.
+             * Formata uma data do formato 'YYYY-MM-DD' para 'DD/MM/YY'.
              */
             function formatarData(dataStr) {
                 if (!dataStr) return '';
                 const [ano, mes, dia] = dataStr.split('-');
-                return `${dia}/${mes}/${ano}`;
+                return `${dia}/${mes}/${ano.slice(-2)}`;
             }
 
             /**
@@ -293,9 +317,12 @@
                 for (let j = 1; j <= NUM_DESIGNACOES; j++) {
                     const nomeCell = document.getElementById(`t${territorioNumero}-name-${j}`);
                     if (nomeCell && nomeCell.innerHTML === '') {
+                        // Popula as células
                         nomeCell.innerHTML = nome;
                         document.getElementById(`t${territorioNumero}-start-${j}`).innerHTML = formatarData(dataInicio);
                         document.getElementById(`t${territorioNumero}-end-${j}`).innerHTML = formatarData(dataConclusao);
+                        
+                        // Atualiza a última data de conclusão
                         document.getElementById(`t${territorioNumero}-last-date`).innerHTML = formatarData(dataConclusao);
                         slotEncontrado = true;
                         break;
@@ -314,7 +341,7 @@
              */
             function exportarParaExcel() {
                 const tabela = document.getElementById('planilha');
-                const workbook = XLSX.utils.table_to_book(tabela, { sheet: "Registros S-13" });
+                const workbook = XLSX.utils.table_to_book(tabela, { sheet: "Registros S-13", raw: true });
                 XLSX.writeFile(workbook, "REGISTRO_DE_TERRITORIO_S13.xlsx");
             }
 
